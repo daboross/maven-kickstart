@@ -17,8 +17,10 @@ import argparse
 import codecs
 import os
 import re
+import subprocess
 
 from jinja2.environment import Template
+import sys
 
 __author__ = 'daboross'
 
@@ -26,7 +28,8 @@ __author__ = 'daboross'
 files = {
     "pom.xml": "pom.xml",
     "plugin.yml": "src/main/resources/plugin.yml",
-    "plugin.java": "src/main/java/{src_dir}/{name}Plugin.java"
+    "plugin.java": "src/main/java/{src_dir}/{name}Plugin.java",
+    "gitignore": ".gitignore",
 }
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -69,17 +72,42 @@ class MavenKickstartCreator:
 
     def init_command_line(self):
         parser = argparse.ArgumentParser(description="Create maven projects with ease")
-        parser.add_argument('--name', help="Name of the project", required=True)
-        parser.add_argument('--directory', help="Directory to put the project in, defaulting to $PWD/$NAME")
-        parser.add_argument('--desc', help="Description of the project", metavar="DESCRIPTION")
-        parser.add_argument('--group', help="Maven groupId", metavar="MAVEN_GROUP", dest="maven_group")
-        parser.add_argument('--github', help="Name of github repository to create", metavar="REPO_NAME")
-        parser.add_argument('--artifact', help="Maven artifactId, defaulting to project name, replacing capatalization "
-                                               "and adding '-'s", metavar="MAVEN_ARTIFACT", dest="maven_artifact")
+        # main properties
+        parser.add_argument('--name', required=True,
+                            help="Name of the project")
+        parser.add_argument('--directory',
+                            help="Directory to put the project in, defaulting to $PWD/$NAME")
+        parser.add_argument('--desc',
+                            help="Description of the project", metavar="DESCRIPTION")
+        # maven properties
+        parser.add_argument('--group', metavar="MAVEN_GROUP", dest="maven_group",
+                            help="Maven groupId")
+        parser.add_argument('--artifact', metavar="MAVEN_ARTIFACT", dest="maven_artifact",
+                            help="Maven artifactId, defaulting to project name, replacing capatalization with dashes")
+        # github properties
+        parser.add_argument('--github', metavar="REPO_NAME",
+                            help="Name of github repository to create")
+        parser.add_argument('--github-organization', metavar="ORG_NAME", default="daboross", dest="github_org",
+                            help="Name of the github organization to create a repository under")
+
+        # plugin toggle properties
         parser.add_argument('--metrics', dest='metrics', action='store_true', default=True,
-                            help="Enables metrics in the plugin, this is enabled by default")
+                            help="Enables metrics in the plugin, enabled by default")
         parser.add_argument('--no-metrics', dest='metrics', action='store_false',
                             help="Disables metrics in the plugin")
+        parser.add_argument('--distribute', dest='add_distribution', action='store_true', default=True,
+                            help="Enables  distribution via maven repository for the plugin, disabled by default")
+        parser.add_argument('--no-distribute', dest='add_distribution', action='store_false',
+                            help="Disables distribution via maven repository for the plugin")
+
+        # author properties
+        parser.add_argument('--author', default="Dabo Ross", dest="author_name",
+                            help="Full name of author")
+        parser.add_argument('--author-email', default="daboross@daboross.net", dest="author_email",
+                            help="Email address of the author")
+        parser.add_argument('--author-website', default="http://daboross.net", dest="author_website",
+                            help="Website address of the author")
+
         args = parser.parse_args()
 
         if args.directory is None:
@@ -98,6 +126,7 @@ class MavenKickstartCreator:
 
         args.java_package = args.maven_group.replace("-", "")
         args.src_dir = args.java_package.replace(".", os.path.sep)
+        args.author_id = args.author_name.lower().replace(" ", "")
 
         self.args = args
         self.name = args.name
@@ -118,10 +147,24 @@ class MavenKickstartCreator:
             print("Creating {}".format(file_path))
 
             with codecs.open(os.path.join(template_dir, template_name), encoding="utf-8") as stream:
-                template = Template(stream.read())
+                text = stream.read()
+                newline = text.endswith("\n")  # fix for jinja2 templates removing trailing newline
+                template = Template(text)
 
             with codecs.open(file_path, "w", encoding="utf-8") as stream:
                 stream.write(template.render(**args))
+                if newline:
+                    stream.write("\n")
+
+        self.init_github()
+        if self.github_name:
+            self.create_github_repo()
+
+    def init_github(self):
+        subprocess.call(["git", "init"], cwd=self.directory)
+
+    def create_github_repo(self):
+        pass
 
 
 if __name__ == "__main__":

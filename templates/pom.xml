@@ -1,3 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright (C) 2014 {{ author_name }} <{{ author_website }}>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -8,12 +24,9 @@
     <packaging>jar</packaging>
 
     <name>{{ name }}</name>
-    <description>{{ desc }}</description>
-    {% if github %}
-        <url>https://github.com/daboross/{{ github }}</url>
-    {% else %}
-        <url>http://daboross.net</url>
-    {% endif %}
+    <description>{{ desc }}</description>{% if github %}
+    <url>https://github.com/{{ github_org }}/{{ github }}</url>{% else %}
+    <url>{{ author_website }}</url>{% endif %}
     <inceptionYear>2014</inceptionYear>
     <licenses>
         <license>
@@ -23,53 +36,49 @@
     </licenses>
     <developers>
         <developer>
-            <id>daboross</id>
-            <name>Dabo Ross</name>
-            <email>daboross@daboross.net</email>
-            <url>http://www.daboross.net</url>
+            <id>{{ author_id }}</id>
+            <name>{{ author_name }}</name>
+            <email>{{ author_email }}</email>
+            <url>{{ author_website }}</url>
             <timezone>-8</timezone>
         </developer>
     </developers>
-    {% if github %}
+{% if github %}
         <scm>
-            <url>https://github.com/daboross/{{ github }}</url>
-            <connection>scm:git:https://github.com/daboross/{{ github }}.git</connection>
-            <developerConnection>scm:git:git@github.com:daboross/{{ github }}.git</developerConnection>
-        </scm>
-    {% endif %}
+            <url>https://github.com/{{ github_org }}/{{ github }}</url>
+            <connection>scm:git:https://github.com/{{ github_org }}/{{ github }}.git</connection>
+            <developerConnection>scm:git:git@github.com:{{ github_org }}/{{ github }}.git</developerConnection>
+        </scm>{% endif %}
     <properties>
-        <netbeans.hint.license>gpl3</netbeans.hint.license>
+        <netbeans.hint.license>gpl30</netbeans.hint.license>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.6.2-R1.0</version>
-            <scope>provided</scope>
-        </dependency>{% if metrics %}
-        <dependency>
-            <groupId>org.mcstats.bukkit</groupId>
-            <artifactId>metrics-lite</artifactId>
-            <version>R7</version>
-            <scope>compile</scope>
-        </dependency>
-    {% endif %}
-    </dependencies>
     <repositories>
-        <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public</url>
-        </repository>
         <repository>
             <id>repo-daboross-net</id>
             <url>http://repo.daboross.net/</url>
         </repository>
     </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.9-R0.1</version>
+            <scope>provided</scope>
+        </dependency>{% if metrics %}
+        <dependency>
+            <groupId>net.daboross.metrics.bukkit</groupId>
+            <artifactId>metrics-lite</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+    {% endif %}
+    </dependencies>
 
     <build>
         <finalName>${project.name}</finalName>
+        <defaultGoal>clean package</defaultGoal>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
@@ -88,7 +97,7 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
-            </plugin>
+            </plugin>{% if metrics %}
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -100,11 +109,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.mcstats.bukkit:metrics-lite</include>
-                                </includes>
-                            </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>org.mcstats</pattern>
@@ -114,33 +118,29 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <arguments>-Prelease</arguments>
-                </configuration>
-            </plugin>
+            </plugin>{% endif %}
         </plugins>
     </build>
     {% if github %}
         <issueManagement>
-            <url>https://github.com/daboross/{{ github }}/issues/</url>
+            <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
             <system>Github Issues</system>
-        </issueManagement>
-    {% endif %}
+        </issueManagement>{% endif %}{% if add_distribution %}
     <distributionManagement>
         <repository>
-            <id>repo-daboross-net</id>
-            <name>repo.daboross.net</name>
+            <id>dabo.guru</id>
+            <name>Release Repository</name>
             <uniqueVersion>false</uniqueVersion>
-            <url>scp://repo.daboross.net/repo/</url>
+            <url>http://dabo.guru/nexus/content/repositories/releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>dabo.guru</id>
+            <name>Snapshot Repository</name>
+            <uniqueVersion>false</uniqueVersion>
+            <url>http://dabo.guru/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
+
     <profiles>
         <profile>
             <id>release</id>
@@ -189,5 +189,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>{% endif %}
 </project>
