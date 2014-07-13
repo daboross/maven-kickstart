@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# PYTHON_ARGCOMPLETE_OK
 #
 # Copyright 2014 Dabo Ross <http://www.daboross.net/>
 #
@@ -14,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import argcomplete
 import codecs
 import os
 import re
@@ -57,7 +59,9 @@ class MavenKickstartCreator:
         self.directory = None
 
     def init_command_line(self):
-        parser = argparse.ArgumentParser(description="Create maven projects with ease")
+        parser = argparse.ArgumentParser(description="Create maven projects with ease", add_help=False)
+        parser.add_argument("--help", action="help", help="show this help message and exit")  # to remove -h
+
         # main properties
         parser.add_argument('--name', required=True,
                             help="Name of the project")
@@ -94,6 +98,7 @@ class MavenKickstartCreator:
         parser.add_argument('--author-website', default="http://daboross.net", dest="author_website",
                             help="Website address of the author")
 
+        argcomplete.autocomplete(parser)
         args = parser.parse_args()
 
         if args.directory is None:
