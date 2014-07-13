@@ -1,5 +1,5 @@
 name: ${project.name}
-main: {{ maven_group }}.{{ name }}Plugin
+main: {{ java_package }}.{{ name }}Plugin
 version: ${project.version}
 author: Dabo Ross
 description: ${project.description}

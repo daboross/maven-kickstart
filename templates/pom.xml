@@ -112,7 +112,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.mcstats</pattern>
-                                    <shadedPattern>{{ maven_group }}.libraries.mcstats</shadedPattern>
+                                    <shadedPattern>{{ java_package }}.libraries.mcstats</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -121,11 +121,11 @@
             </plugin>{% endif %}
         </plugins>
     </build>
-    {% if github %}
-        <issueManagement>
-            <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
-            <system>Github Issues</system>
-        </issueManagement>{% endif %}{% if add_distribution %}
+{% if github %}
+    <issueManagement>
+        <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
+        <system>Github Issues</system>
+    </issueManagement>{% endif %}{% if add_distribution %}
     <distributionManagement>
         <repository>
             <id>dabo.guru</id>

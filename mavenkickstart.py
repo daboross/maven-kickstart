@@ -20,7 +20,6 @@ import re
 import subprocess
 
 from jinja2.environment import Template
-import sys
 
 __author__ = 'daboross'
 
@@ -33,19 +32,6 @@ files = {
 }
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
-
-
-def ask_question(question, is_boolean=False):
-    print(question)
-    if is_boolean:
-        while True:
-            str_input = input("([Y]es/[N]o)> ").lower()
-            if str_input == "y" or str_input == "yes":
-                return True
-            elif str_input == "n" or str_input == "no":
-                return False
-    else:
-        return input("> ")
 
 
 def name_to_artifact(name):
