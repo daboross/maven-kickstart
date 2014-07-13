@@ -17,13 +17,12 @@
 package {{ java_package }};
 
 import java.io.IOException;
-import java.util.logging.Level;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.MetricsLite;
+import org.bukkit.plugin.java.JavaPlugin;{% if metrics %}
+import org.mcstats.MetricsLite;{% endif %}
 
 public class {{ name }}Plugin extends JavaPlugin implements Listener {
 
