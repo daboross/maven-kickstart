@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?>{% if add_license %}<!--
   ~ Copyright (C) 2014 {{ author_name }} <{{ author_website }}>
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+  -->{% endif %}
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -27,13 +27,13 @@
     <description>{{ desc }}</description>{% if github %}
     <url>https://github.com/{{ github_org }}/{{ github }}</url>{% else %}
     <url>{{ author_website }}</url>{% endif %}
-    <inceptionYear>2014</inceptionYear>
+    <inceptionYear>2014</inceptionYear>{% if add_license %}
     <licenses>
         <license>
             <name>GNU General Public License (GPL) Version 3</name>
             <url>http://www.gnu.org/licenses/gpl.html</url>
         </license>
-    </licenses>
+    </licenses>{% endif %}{% if add_author_info %}
     <developers>
         <developer>
             <id>{{ author_id }}</id>
@@ -42,15 +42,15 @@
             <url>{{ author_website }}</url>
             <timezone>-8</timezone>
         </developer>
-    </developers>
-{% if github %}
+    </developers>{% endif %}
+    {% if github %}
         <scm>
             <url>https://github.com/{{ github_org }}/{{ github }}</url>
             <connection>scm:git:https://github.com/{{ github_org }}/{{ github }}.git</connection>
             <developerConnection>scm:git:git@github.com:{{ github_org }}/{{ github }}.git</developerConnection>
         </scm>{% endif %}
-    <properties>
-        <netbeans.hint.license>gpl30</netbeans.hint.license>
+    <properties>{% if add_license %}
+        <netbeans.hint.license>gpl30</netbeans.hint.license>{% endif %}
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>{% bukkit_version %}</version>
+            <version>{{ bukkit_version }}</version>
             <scope>provided</scope>
         </dependency>{% if metrics %}
         <dependency>
@@ -120,11 +120,11 @@
             </plugin>{% endif %}
         </plugins>
     </build>
-{% if github %}
-    <issueManagement>
-        <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
-        <system>Github Issues</system>
-    </issueManagement>{% endif %}{% if add_distribution %}
+    {% if github %}
+        <issueManagement>
+            <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
+            <system>Github Issues</system>
+        </issueManagement>{% endif %}{% if add_distribution %}
     <distributionManagement>
         <repository>
             <id>dabo.guru</id>

@@ -1,4 +1,4 @@
-/*
+{% if add_license %}/*
  * Copyright (C) 2014 {{ author_name }} <{{ author_website }}>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package {{ java_package }};
+{% endif %}package {{ java_package }};
 {% if metrics %}
 import java.io.IOException;{% endif %}{% if command_starter %}
 import org.bukkit.command.Command;
@@ -27,7 +27,7 @@ import org.mcstats.MetricsLite;{% endif %}
 public class {{ name }}Plugin extends JavaPlugin{% if listener_start %} implements Listener{% endif %} {
 
     @Override
-    public void onEnable() {{% if listener_starter %}
+    public void onEnable() {{ "{" }}{% if listener_starter %}
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(this, this);{% endif %}{% if metrics %}
         MetricsLite metrics = null;

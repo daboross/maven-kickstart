@@ -16,6 +16,7 @@
 # limitations under the License.
 import argparse
 import codecs
+import json
 import os
 import re
 import subprocess
@@ -62,7 +63,6 @@ def add_togglable_property(parser, name, *, dest=None, default, help_content):
 
 class MavenKickstartCreator:
     """
-    :type args: argparse.Namespace
     :type name: str
     :type desc: str
     :type github_name: str
@@ -81,7 +81,7 @@ class MavenKickstartCreator:
         parser.add_argument("--help", action="help", help="show this help message and exit")  # to remove -h
 
         # main properties
-        parser.add_argument('--name', required=True,
+        parser.add_argument('--name',
                             help="Name of the project")
         parser.add_argument('--directory',
                             help="Directory to put the project in, defaulting to $PWD/$NAME")
@@ -117,14 +117,27 @@ class MavenKickstartCreator:
                             help="Email address of the author")
         parser.add_argument('--author-website', default="http://daboross.net", dest="author_website",
                             help="Website address of the author")
+        parser.add_argument('--no-author', default=False, dest="add_author_info",
+                            help="Disables adding author info")
+        parser.add_argument('--no-license', default=False, dest="add_license", action="store_false",
+                            help="Disables adding license info")
+
+        # Other script helpers
+        parser.add_argument("--short-name", dest="project_short_name",
+                            help="Short name to put in ~/.bin/python/project_directories.json")
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args()
+        self.args = args
 
         if args.directory is None:
-            args.directory = os.path.abspath(os.path.join(os.path.curdir, args.name))
+            if args.name is not None:
+                args.directory = os.path.abspath(os.path.join(os.path.curdir, args.name))
         else:
             args.directory = os.path.abspath(args.directory)
+
+        if args.name is None:
+            return  # We won't do any other processing if the name isn't provided
 
         if args.desc is None:
             args.desc = args.name
@@ -139,40 +152,53 @@ class MavenKickstartCreator:
         args.src_dir = args.java_package.replace(".", os.path.sep)
         args.author_id = args.author_name.lower().replace(" ", "")
 
-        self.args = args
         self.name = args.name
         self.desc = args.desc
         self.directory = args.directory
         self.github_name = args.github
 
     def generate(self):
-        args = self.args.__dict__
-        for template_name, file_path in files.items():
-            file_path = file_path.format(**args)
-            file_path = os.path.abspath(os.path.join(self.directory, file_path))
+        if self.args.name is not None:
+            args = self.args.__dict__
+            for template_name, file_path in files.items():
+                file_path = file_path.format(**args)
+                file_path = os.path.abspath(os.path.join(self.directory, file_path))
 
-            file_dir = os.path.dirname(file_path)
-            if not os.path.exists(file_dir):
-                print("Creating directory {}".format(file_dir))
-                os.makedirs(file_dir)
-            print("Creating {}".format(file_path))
+                file_dir = os.path.dirname(file_path)
+                if not os.path.exists(file_dir):
+                    print("Creating directory {}".format(file_dir))
+                    os.makedirs(file_dir)
+                print("Creating {}".format(file_path))
 
-            with codecs.open(os.path.join(template_dir, template_name), encoding="utf-8") as stream:
-                text = stream.read()
-                newline = text.endswith("\n")  # fix for jinja2 templates removing trailing newline
-                template = Template(text)
+                with codecs.open(os.path.join(template_dir, template_name), encoding="utf-8") as stream:
+                    text = stream.read()
+                    newline = text.endswith("\n")  # fix for jinja2 templates removing trailing newline
+                    template = Template(text)
 
-            with codecs.open(file_path, "w", encoding="utf-8") as stream:
-                stream.write(template.render(**args))
-                if newline:
-                    stream.write("\n")
+                with codecs.open(file_path, "w", encoding="utf-8") as stream:
+                    stream.write(template.render(**args))
+                    if newline:
+                        stream.write("\n")
 
-        self.init_github()
-        if self.github_name:
-            self.create_github_repo()
+            self.init_github()
+            if self.github_name:
+                self.create_github_repo()
+
+        if self.args.project_short_name is not None and self.args.directory is not None:
+            self.set_project_directory_shortcut()
 
     def init_github(self):
         subprocess.call(["git", "init"], cwd=self.directory)
+        subprocess.call(["git", "add", "-A"], cwd=self.directory)
+        subprocess.call(["git", "commit", "-m", "[maven-kickstart] Initial Commit"], cwd=self.directory)
+
+    def set_project_directory_shortcut(self):
+        file_path = os.path.expanduser("~/.bin/python/project_directories.json")
+        with codecs.open(file_path, encoding="utf8") as read_file:
+            contents = json.load(read_file)
+        contents[self.args.project_short_name] = self.args.directory[len("/home/daboross/Projects/"):]
+        with codecs.open(file_path, mode="w", encoding="utf8") as write_file:
+            json.dump(contents, write_file, indent=4, sort_keys=True)
 
     def create_github_repo(self):
         pass
