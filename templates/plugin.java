@@ -15,22 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package {{ java_package }};
-
-import java.io.IOException;
+{% if metrics %}
+import java.io.IOException;{% endif %}{% if command_starter %}
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.CommandSender;{% endif %}{% if listener_starter %}
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.PluginManager;{% endif %}
 import org.bukkit.plugin.java.JavaPlugin;{% if metrics %}
 import org.mcstats.MetricsLite;{% endif %}
 
-public class {{ name }}Plugin extends JavaPlugin implements Listener {
+public class {{ name }}Plugin extends JavaPlugin{% if listener_start %} implements Listener{% endif %} {
 
     @Override
-    public void onEnable() {
+    public void onEnable() {{% if listener_starter %}
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(this, this);
-        {% if metrics %}
+        pm.registerEvents(this, this);{% endif %}{% if metrics %}
         MetricsLite metrics = null;
         try {
             metrics = new MetricsLite(this);
@@ -39,17 +38,16 @@ public class {{ name }}Plugin extends JavaPlugin implements Listener {
         }
         if (metrics != null) {
             metrics.start();
-        }
-        {% endif %}
+        }{% endif %}
     }
 
     @Override
     public void onDisable() {
-    }
+    }{% if command_starter %}
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         sender.sendMessage("{{ name }} doesn't know about the command /" + cmd.getName());
         return true;
-    }
+    }{% endif %}
 }

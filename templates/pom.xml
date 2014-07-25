@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.9-R0.2</version>
+            <version>{% bukkit_version %}</version>
             <scope>provided</scope>
         </dependency>{% if metrics %}
         <dependency>
@@ -72,8 +72,7 @@
             <artifactId>metrics-lite</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>
-        </dependency>
-    {% endif %}
+        </dependency>{% endif %}
     </dependencies>
 
     <build>

@@ -15,12 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import argcomplete
 import codecs
 import os
 import re
 import subprocess
 
+import argcomplete
 from jinja2.environment import Template
 
 __author__ = 'daboross'
@@ -40,6 +40,24 @@ def name_to_artifact(name):
     # For names like FirstSECONDThird
     name = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1-\2', name).lower()
+
+
+def add_togglable_property(parser, name, *, dest=None, default, help_content):
+    """
+    Adds a toggleable property to parser, with a --{name} option, and a --no-{name} option
+    :type parser: argparse.ArgumentParser
+    :type name: str
+    :type default: bool
+    :type help_content: str
+    """
+    if dest is None:
+        dest = name.replace('-', '_')
+    parser.add_argument('--{}'.format(name), dest=dest, action='store_true', default=default,
+                        help="Enables {}. {} by default.".format(help_content, "Enabled" if default else "Disabled"))
+    if default:
+        # We don't need a --no-{name} option if it's disabled by default.
+        parser.add_argument('--no-{}'.format(name), dest=dest, action='store_false', default=(not default),
+                            help="Disables {}".format(help_content))
 
 
 class MavenKickstartCreator:
@@ -80,15 +98,17 @@ class MavenKickstartCreator:
         parser.add_argument('--github-organization', metavar="ORG_NAME", default="daboross", dest="github_org",
                             help="Name of the github organization to create a repository under")
 
-        # plugin toggle properties
-        parser.add_argument('--metrics', dest='metrics', action='store_true', default=True,
-                            help="Enables metrics in the plugin, enabled by default")
-        parser.add_argument('--no-metrics', dest='metrics', action='store_false',
-                            help="Disables metrics in the plugin")
-        parser.add_argument('--distribute', dest='add_distribution', action='store_true', default=True,
-                            help="Enables  distribution via maven repository for the plugin, disabled by default")
-        parser.add_argument('--no-distribute', dest='add_distribution', action='store_false',
-                            help="Disables distribution via maven repository for the plugin")
+        # bukkit-specific plugin properties
+        parser.add_argument('--bukkit-version', dest="bukkit_version", default="1.7.9-R0.2",
+                            help="Bukkit library version")
+        add_togglable_property(parser, 'metrics', default=False,
+                               help_content="metrics in the plugin")
+        add_togglable_property(parser, 'distribute', default=False,
+                               help_content="distribution via maven repository for the plugin")
+        add_togglable_property(parser, 'add-oncommand', dest='command_starter', default=False,
+                               help_content="adding a onCommand method to the plugin")
+        add_togglable_property(parser, 'add-listener', dest='listener_starter', default=False,
+                               help_content="the plugin implementing Listener")
 
         # author properties
         parser.add_argument('--author', default="Dabo Ross", dest="author_name",
