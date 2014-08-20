@@ -118,7 +118,7 @@ class MavenKickstartCreator:
         parser.add_argument('--author-website', default="http://daboross.net", dest="author_website",
                             help="Website address of the author")
         parser.add_argument('--no-author', default=False, dest="add_author_info",
-                            help="Disables adding author info")
+                            help="Disables adding author info", action="store_false")
         parser.add_argument('--no-license', default=False, dest="add_license", action="store_false",
                             help="Disables adding license info")
 
