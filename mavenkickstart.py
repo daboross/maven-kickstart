@@ -27,7 +27,13 @@ from jinja2.environment import Template
 __author__ = 'daboross'
 
 # files to create
-files = {
+library_files = {
+    "pom.xml": "pom.xml",
+    "library.java": "src/main/java/{src_dir}/{name}Plugin.java",
+    "gitignore": ".gitignore",
+}
+
+binary_files = {
     "pom.xml": "pom.xml",
     "plugin.yml": "src/main/resources/plugin.yml",
     "plugin.java": "src/main/java/{src_dir}/{name}Plugin.java",
@@ -87,6 +93,8 @@ class MavenKickstartCreator:
                             help="Directory to put the project in, defaulting to $PWD/$NAME")
         parser.add_argument('--desc',
                             help="Description of the project", metavar="DESCRIPTION")
+        add_togglable_property(parser, 'binary', dest="binary", default=True,
+                            help_content="generate a plugin.yml and onEnable in the plugin.java")
         # maven properties
         parser.add_argument('--group', metavar="MAVEN_GROUP", dest="maven_group",
                             help="Maven groupId")
@@ -99,7 +107,7 @@ class MavenKickstartCreator:
                             help="Name of the github organization to create a repository under")
 
         # bukkit-specific plugin properties
-        parser.add_argument('--bukkit-version', dest="bukkit_version", default="1.7.9-R0.2",
+        parser.add_argument('--bukkit-version', dest="bukkit_version", default="1.9.4-R0.1-20160603.113520-25",
                             help="Bukkit library version")
         add_togglable_property(parser, 'metrics', default=False,
                                help_content="metrics in the plugin")
@@ -160,6 +168,10 @@ class MavenKickstartCreator:
     def generate(self):
         if self.args.name is not None:
             args = self.args.__dict__
+            if self.args.binary:
+                files = binary_files
+            else:
+                files = library_files
             for template_name, file_path in files.items():
                 file_path = file_path.format(**args)
                 file_path = os.path.abspath(os.path.join(self.directory, file_path))
