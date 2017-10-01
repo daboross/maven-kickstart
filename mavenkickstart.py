@@ -27,18 +27,14 @@ from jinja2.environment import Template
 __author__ = 'daboross'
 
 # files to create
-library_files = {
+files = {
     "pom.xml": "pom.xml",
-    "library.java": "src/main/java/{src_dir}/{name}Plugin.java",
-    "gitignore": ".gitignore",
+    "test.java": "src/test/java/JunitTests.java"
 }
 
-binary_files = {
-    "pom.xml": "pom.xml",
-    "plugin.yml": "src/main/resources/plugin.yml",
-    "plugin.java": "src/main/java/{src_dir}/{name}Plugin.java",
-    "gitignore": ".gitignore",
-}
+directories = [
+    "src/main/java"
+]
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 
@@ -71,7 +67,6 @@ class MavenKickstartCreator:
     """
     :type name: str
     :type desc: str
-    :type github_name: str
     :type directory: str
     """
 
@@ -79,7 +74,6 @@ class MavenKickstartCreator:
         self.args = None
         self.name = None
         self.desc = None
-        self.github_name = None
         self.directory = None
 
     def init_command_line(self):
@@ -100,26 +94,9 @@ class MavenKickstartCreator:
                             help="Maven groupId")
         parser.add_argument('--artifact', metavar="MAVEN_ARTIFACT", dest="maven_artifact",
                             help="Maven artifactId, defaulting to project name, replacing capatalization with dashes")
-        # github properties
-        parser.add_argument('--github', metavar="REPO_NAME",
-                            help="Name of github repository to create")
-        parser.add_argument('--github-organization', metavar="ORG_NAME", default="daboross", dest="github_org",
-                            help="Name of the github organization to create a repository under")
-
-        # bukkit-specific plugin properties
-        parser.add_argument('--bukkit-version', dest="bukkit_version", default="1.9.4-R0.1-20160603.113520-25",
-                            help="Bukkit library version")
-        add_togglable_property(parser, 'metrics', default=False,
-                               help_content="metrics in the plugin")
-        add_togglable_property(parser, 'distribute', default=False,
-                               help_content="distribution via maven repository for the plugin")
-        add_togglable_property(parser, 'add-oncommand', dest='command_starter', default=False,
-                               help_content="adding a onCommand method to the plugin")
-        add_togglable_property(parser, 'add-listener', dest='listener_starter', default=False,
-                               help_content="the plugin implementing Listener")
 
         # author properties
-        parser.add_argument('--author', default="Dabo Ross", dest="author_name",
+        parser.add_argument('--author', default="David Ross", dest="author_name",
                             help="Full name of author")
         parser.add_argument('--author-email', default="daboross@daboross.net", dest="author_email",
                             help="Email address of the author")
@@ -127,12 +104,8 @@ class MavenKickstartCreator:
                             help="Website address of the author")
         parser.add_argument('--no-author', default=False, dest="add_author_info",
                             help="Disables adding author info", action="store_false")
-        parser.add_argument('--no-license', default=False, dest="add_license", action="store_false",
+        parser.add_argument('--no-license', default=True, dest="add_license", action="store_false",
                             help="Disables adding license info")
-
-        # Other script helpers
-        parser.add_argument("--short-name", dest="project_short_name",
-                            help="Short name to put in ~/.bin/python/project_directories.json")
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args()
@@ -147,6 +120,9 @@ class MavenKickstartCreator:
         if args.name is None:
             return  # We won't do any other processing if the name isn't provided
 
+        if args.name.islower():
+            args.name = args.name.title()
+
         if args.desc is None:
             args.desc = args.name
 
@@ -154,7 +130,7 @@ class MavenKickstartCreator:
             args.maven_artifact = name_to_artifact(args.name)
 
         if args.maven_group is None:
-            args.maven_group = "net.daboross.bukkitdev.{}".format(args.maven_artifact)
+            args.maven_group = "net.daboross.school.{}".format(args.maven_artifact)
 
         args.java_package = args.maven_group.replace("-", "")
         args.src_dir = args.java_package.replace(".", os.path.sep)
@@ -163,15 +139,10 @@ class MavenKickstartCreator:
         self.name = args.name
         self.desc = args.desc
         self.directory = args.directory
-        self.github_name = args.github
 
     def generate(self):
         if self.args.name is not None:
             args = self.args.__dict__
-            if self.args.binary:
-                files = binary_files
-            else:
-                files = library_files
             for template_name, file_path in files.items():
                 file_path = file_path.format(**args)
                 file_path = os.path.abspath(os.path.join(self.directory, file_path))
@@ -191,29 +162,10 @@ class MavenKickstartCreator:
                     stream.write(template.render(**args))
                     if newline:
                         stream.write("\n")
-
-            self.init_github()
-            if self.github_name:
-                self.create_github_repo()
-
-        if self.args.project_short_name is not None and self.args.directory is not None:
-            self.set_project_directory_shortcut()
-
-    def init_github(self):
-        subprocess.call(["git", "init"], cwd=self.directory)
-        subprocess.call(["git", "add", "-A"], cwd=self.directory)
-        subprocess.call(["git", "commit", "-m", "[maven-kickstart] Initial Commit"], cwd=self.directory)
-
-    def set_project_directory_shortcut(self):
-        file_path = os.path.expanduser("~/.bin/python/project_directories.json")
-        with codecs.open(file_path, encoding="utf8") as read_file:
-            contents = json.load(read_file)
-        contents[self.args.project_short_name] = self.args.directory[len("/home/daboross/Projects/"):]
-        with codecs.open(file_path, mode="w", encoding="utf8") as write_file:
-            json.dump(contents, write_file, indent=4, sort_keys=True)
-
-    def create_github_repo(self):
-        pass
+            for file_path in directories:
+                if not os.path.exists(file_path):
+                    print("Creating directory {}".format(file_path))
+                    os.makedirs(file_path)
 
 
 if __name__ == "__main__":

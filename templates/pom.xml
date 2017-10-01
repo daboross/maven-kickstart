@@ -1,21 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>{% if add_license %}<!--
-  ~ Copyright (C) 2014 {{ author_name }} <{{ author_website }}>
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU General Public License as published by
-  ~ the Free Software Foundation, either version 3 of the License, or
-  ~ (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->{% endif %}
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>{{ maven_group }}</groupId>
@@ -24,68 +11,18 @@
     <packaging>jar</packaging>
 
     <name>{{ name }}</name>
-    <description>{{ desc }}</description>{% if github %}
-    <url>https://github.com/{{ github_org }}/{{ github }}</url>{% else %}
-    <url>{{ author_website }}</url>{% endif %}
-    <inceptionYear>2016</inceptionYear>{% if add_license %}
-    <licenses>
-        <license>
-            <name>GNU General Public License (GPL) Version 3</name>
-            <url>http://www.gnu.org/licenses/gpl.html</url>
-        </license>
-    </licenses>{% endif %}{% if add_author_info %}
-    <developers>
-        <developer>
-            <id>{{ author_id }}</id>
-            <name>{{ author_name }}</name>
-            <email>{{ author_email }}</email>
-            <url>{{ author_website }}</url>
-            <timezone>-8</timezone>
-        </developer>
-    </developers>{% endif %}
-    {% if github %}
-        <scm>
-            <url>https://github.com/{{ github_org }}/{{ github }}</url>
-            <connection>scm:git:https://github.com/{{ github_org }}/{{ github }}.git</connection>
-            <developerConnection>scm:git:git@github.com:{{ github_org }}/{{ github }}.git</developerConnection>
-        </scm>{% endif %}
-    <properties>{% if add_license %}
-        <netbeans.hint.license>gpl30</netbeans.hint.license>{% endif %}
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>{% if metrics %}
-        <repository>
-            <id>repo-daboross-net-backup-mcstats-mirror</id>
-            <url>http://repo.daboross.net/mcstats/</url>
-        </repository>
-        <repository>
-            <id>repo-daboross-net-backup-mcstats-snapshots-mirror</id>
-            <url>http://repo.daboross.net/mcstats-snapshots/</url>
-        </repository>{% endif %}
-    </repositories>
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>{{ bukkit_version }}</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>provided</scope>
-        </dependency>{% if metrics %}
-        <dependency>
-            <groupId>org.mcstats.bukkit</groupId>
-            <artifactId>metrics-lite</artifactId>
-            <version>R8-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>{% endif %}
+        </dependency>
     </dependencies>
 
     <build>
         <finalName>${project.name}</finalName>
-        <defaultGoal>clean package</defaultGoal>
+        <defaultGoal>clean test</defaultGoal>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
@@ -99,102 +36,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.7.0</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
-            </plugin>{% if metrics %}
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.mcstats</pattern>
-                                    <shadedPattern>{{ java_package }}.libraries.mcstats</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>{% endif %}
+            </plugin>
         </plugins>
     </build>
-    {% if github %}
-        <issueManagement>
-            <url>https://github.com/{{ github_org }}/{{ github }}/issues/</url>
-            <system>Github Issues</system>
-        </issueManagement>{% endif %}{% if add_distribution %}
-    <distributionManagement>
-        <repository>
-            <id>dabo.guru</id>
-            <name>Release Repository</name>
-            <uniqueVersion>false</uniqueVersion>
-            <url>http://dabo.guru/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>dabo.guru</id>
-            <name>Snapshot Repository</name>
-            <uniqueVersion>false</uniqueVersion>
-            <url>http://dabo.guru/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>2.3</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>{% endif %}
 </project>

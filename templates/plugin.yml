@@ -1,6 +1,0 @@
-name: ${project.name}
-main: {{ java_package }}.{{ name }}Plugin
-version: ${project.version}
-author: {{ author_name }}
-description: ${project.description}
-url: ${project.url}
