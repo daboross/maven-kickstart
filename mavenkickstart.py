@@ -29,7 +29,7 @@ __author__ = 'daboross'
 # files to create
 files = {
     "pom.xml": "pom.xml",
-    "test.java": "src/test/java/JunitTests.java"
+    "test.java": "src/test/java/JunitTest.java"
 }
 
 directories = [
