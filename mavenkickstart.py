@@ -162,10 +162,11 @@ class MavenKickstartCreator:
                     stream.write(template.render(**args))
                     if newline:
                         stream.write("\n")
-            for file_path in directories:
-                if not os.path.exists(file_path):
-                    print("Creating directory {}".format(file_path))
-                    os.makedirs(file_path)
+            for directory_path in directories:
+                directory_path = os.path.abspath(os.path.join(self.directory, directory_path))
+                if not os.path.exists(directory_path):
+                    print("Creating directory {}".format(directory_path))
+                    os.makedirs(directory_path)
 
 
 if __name__ == "__main__":

@@ -22,16 +22,7 @@
 
     <build>
         <finalName>${project.name}</finalName>
-        <defaultGoal>clean test</defaultGoal>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+        <defaultGoal>test</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
